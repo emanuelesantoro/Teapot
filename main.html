@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <head>
+    <meta name='title' content='Teapot.x3d'/>
+    <meta name='description' content='A watertight (solid) Utah Teapot Model converted from obj format.'/>
+    <meta name='created' content='20 March 2016'/>
+    <meta name='modified' content='20 October 2019'/>
+    <meta name='creator' content='Pyarelal Knowles'/>
+    <meta name='translator' content='Don Brutzman'/>
+    <meta name='reference' content='wt_teapot.obj'/>
+    <meta name='reference' content='teapot.ply'/>
+    <meta name='reference' content=' http://goanna.cs.rmit.edu.au/~pknowles/models.html '/>
+    <meta name='reference' content=' https://en.wikipedia.org/wiki/Utah_teapot '/>
+    <meta name='reference' content=' https://en.wikipedia.org/wiki/List_of_common_3D_test_models '/>
+    <meta name='reference' content=' http://www.realtimerendering.com/udacity/?load=demo/unit1-teapot-demo.js '/>
+    <meta name='identifier' content=' https://x3dgraphics.com/examples/X3dForAdvancedModeling/GeometricShapes/Teapot.x3d '/>
+    <meta name='generator' content='Meshlab X3D Exported, http://meshlab.sourceforge.net'/>
+    <meta name='generator' content='X3D-Edit 3.3, https://savage.nps.edu/X3D-Edit'/>
+    <meta name='license' content=' ../license.html'/>
+    <title>Teapot</title>
+    <script type="text/javascript" src="https://www.x3dom.org/download/x3dom.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://www.x3dom.org/download/x3dom.css">
+    <link rel="stylesheet" type="text/css" href="main.css"/>
+    <script src="teapot.js" defer></script>
+</head>
+<body>
+    <h1>Second task task: Render Teapot</h1>
+    <div class="box">
+      <x3d id="firstCtx">
+        <scene>
+            <transform id="transform" translation="0 0 0" rotation="1 0 0 -1">
+                <shape>
+                    <appearance>
+                        <material diffuseColor="0 1 200"></material>
+                    </appearance>
+                    <indexedFaceSet id="faces" solid="true" edge="true" creaseAngle="0" coordIndex="2 1 0">
+                        <coordinate id="points" point="0 0 0 1 1 0 1 0 0"></coordinate>
+                    </indexedFaceSet>
+                </shape>
+            </transform>
+        </scene>
+      </x3d>
+    </div>
+  </body>
+  
+</html>

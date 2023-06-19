@@ -1,0 +1,58 @@
+#firstCtx {
+    width: 600px;
+    height: 600px;
+    background: grey;
+}
+
+#secondCtx {
+    width: 90%;
+    height: 600px;
+    background: grey;
+}
+
+.inpt {
+    background: white;
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 5px;
+    margin: 5px;
+    width: 250px;
+}
+
+#inptBox {
+    margin: 5px;
+    display: grid;
+    justify-content: left;
+    border: 1px solid green;
+    padding: 1px;
+}
+
+.align {
+    display: flex;
+
+}
+
+button {
+    box-shadow: 0px 0px 0px 0px #3dc21b;
+    background-color: #44c767;
+    border-radius: 16px;
+    border: 1px solid #18ab29;
+    display: inline-block;
+    cursor: pointer;
+    color: #ffffff;
+    font-family: Arial;
+    font-size: 17px;
+    padding: 11px 23px;
+    text-decoration: none;
+    text-shadow: 0px 1px 0px #2f6627;
+}
+
+button:hover {
+    background-color: #5cbf2a;
+}
+
+button:active {
+    position: relative;
+    top: 1px;
+}
+
