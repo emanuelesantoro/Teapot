@@ -30,17 +30,35 @@ class Point {
     //Return the multiplication of the point with the bernstein polynomial of i, n and t
     pointPerBern(i, n, t) {
         let bern = bernstein(i, n, t);
-        this.x = this.x * bern;
-        this.y = this.y * bern;
-        this.z = this.z * bern;
+        return new Point(this.x * bern, this.y * bern, this.z * bern);
     }
     //Return the addition of the point with another point
     addPoint(point) {
-        this.x = this.x + point.getX();
-        this.y = this.y + point.getY();
-        this.z = this.z + point.getZ();
+        return new Point(this.x + point.getX(), this.y + point.getY(), this.z + point.getZ());
     }
-
+    //Return the subtraction of the point with another point
+    subtractPoint(point) {
+        return new Point(this.x - point.getX(), this.y - point.getY(), this.z - point.getZ());
+    }
+    //Return the multiplication of the point with a scalar
+    divideScalar(scalar) {
+        return new Point(this.x / scalar, this.y / scalar, this.z / scalar);
+    }
+    //Return the multiplication of the point with a scalar
+    multiplyScalar(scalar) {
+        return new Point(this.x * scalar, this.y * scalar, this.z * scalar);
+    }
+    //Return the cross product of the point with another point
+    cross(point) {
+        const x = this.y * point.getZ() - this.z * point.getY();
+        const y = this.z * point.getX() - this.x * point.getZ();
+        const z = this.x * point.getY() - this.y * point.getX();
+        return new Point(x, y, z);
+    }
+    //Return the dot product of the point with another point
+    dot(point) {
+        return this.x * point.getX() + this.y * point.getY() + this.z * point.getZ();
+    }
     toString() {
         return `${this.x} ${this.y} ${this.z}`;
     }
