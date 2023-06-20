@@ -101,7 +101,6 @@ const teapotVS = [
     -1.425, -0.798, 0.0, -0.798, -1.425, 0.0, 0.0, -1.425, 0.0,
     0.84, -1.5, 0.15, 1.5, -0.84, 0.15, 0.84, -1.5, 0.075,
     1.5, -0.84, 0.075, 0.798, -1.425, 0.0, 1.425, -0.798, 0.0];
-//
 // The teapot patches; each patch consists of 4x4 Bezier points.
 // 
 const teapotBP = [
@@ -139,31 +138,106 @@ const teapotBP = [
     [270, 270, 270, 270, 300, 305, 306, 279, 297, 303, 304, 275, 294, 301, 302, 271]];
 
 //Function that will evaluate the surface given the u and v parameters
-function evaluateSurface(u, v) {
+function evaluateSurface(u, v, patch) {
     //Define a new point accumulator for the sum
-    accumu = new Point(0, 0, 0);
+    let accumu = new Point(0, 0, 0);
     for (let i = 0; i < 4; i++) {
         for (let j = 0; j < 4; j++) {
-            //find the control point needed : the constructor of point will find the coordinates of the control point based on the index
-            point = new Point((i * 4) + j)
+            //find the control point needed : the constructor of point will find the coordinates of the control point in the patch based on the index
+            let point = new Point((i * 4) + j, patch)
             //multiply the previous point by the bernstein polynomials calculated in u and v
-            point.pointPerBern(i, 4, u)
-            point.pointPerBern(j, 4, v)
+            point.pointPerBern(i, 3, u)
+            point.pointPerBern(j, 3, v)
             //add the point to the accumulator
             accumu.addPoint(point)
         }
     }
     return accumu
 }
-//Function that will update the x3d context
-function update() {
-    //find the id on the html page
-    let documentPoints = document.getElementById("points");
-    var coordIndexElement = document.getElementById('faces');
-    //coordIndexElement.setAttribute("coordIndex", patchesToString(teapotBP));
-    //documentPoints.setAttribute("point", pointToString(teapotVS));
+
+//Function rendering the teapot
+let teapotPoints = [];
+let teapotFaces=[];
+
+function generatePolyTeapot() {
+    const numPatches = teapotBP.length;
+    teapotPoints= [];
+    teapotFaces=[];
+    // Generate teapotPoints and vertices
+    for (let np = 0; np < numPatches; ++np) {
+        // Generate grid and assign values to teapotPoints
+        let points=[];
+        for (let j = 0, k = 0; j <= divs; ++j) {
+            for (let i = 0; i <= divs; ++i, ++k) {
+                points.push( evaluateSurface(i / divs, j / divs, np));
+            }
+        }
+        teapotPoints.push(points)
+
+        // Face connectivity and assign values to vertices
+        let faces=[];
+        let shiftPatch = np * (divs + 1) * (divs + 1);
+        for (let j = 0, k = 0; j < divs; ++j) {
+            for (let i = 0; i < divs; ++i, ++k) {
+                faces[k * 4] = (divs + 1) * j + i + shiftPatch;
+                faces[k * 4 + 1] = (divs + 1) * (j + 1) + i + shiftPatch;
+                faces[k * 4 + 2] = (divs + 1) * (j + 1) + i + 1 + shiftPatch;
+                faces[k * 4 + 3] = (divs + 1) * j + i + 1 + shiftPatch;
+            }
+        }
+        teapotFaces.push(faces)
+    }
 }
 
 
+function renderTeapot(stepU, stepV) {
+    teapotPoints = [];
+    for (let i = 0; i < teapotBP.length; i++) {
+        let points = [];
+        let u = 0;
+        let v = 0;
+        while (true) {
+            while (true) {
+                const clampedU = Math.min(u, 1);
+                const clampedV = Math.min(v, 1);
+                points.push(evaluateSurface(clampedU, clampedV, i));
+                if (v > 1) break;
+                v += stepV;
+            }
+            v = 0;
+            if (u > 1) break;
+            u += stepU;
+        }
+        teapotPoints.push(points);
+    }
+}
 
-document.addEventListener("Load", update());
+//define globally the step for u and v
+var divs;
+
+function updateStepUV() {
+    divs = parseInt(document.getElementById("divs").value);
+    generatePolyTeapot()
+    update();
+}
+
+
+// Function to update the teapot point cloud
+function update() {
+    // Get the pointSet element
+    let pointSet = document.getElementById("points");
+    let faceSet = document.getElementById("faces");
+    pointSet.setAttribute("point", pointsToString());
+    faceSet.setAttribute("coordIndex", facesToString());
+}
+function pointsToString(){
+    // Convert teapotPoints to a plain string array separated by spaces
+    return teapotPoints.map(patch => patch.map(point => point.toString()).join(" ")).join(" ");
+
+}
+function facesToString() {
+    return teapotFaces.map(patch => patch.join(" ")).join(" ");
+}
+
+document.addEventListener("load", updateStepUV);
+document.getElementById("btn").addEventListener("click", updateStepUV)

@@ -1,11 +1,5 @@
-#firstCtx {
+#teapotScene {
     width: 600px;
-    height: 600px;
-    background: grey;
-}
-
-#secondCtx {
-    width: 90%;
     height: 600px;
     background: grey;
 }
