@@ -14,7 +14,6 @@ class Point {
             this.y = arg2 || 0;
             this.z = arg3 || 0;
         }
-
     }
 
     getX() {
@@ -28,20 +27,14 @@ class Point {
     getZ() {
         return this.z;
     }
-
-    pow(i) {
-        this.x = Math.pow(this.x, i);
-        this.y = Math.pow(this.y, i);
-        this.z = Math.pow(this.z, i);
-    }
-
+    //Return the multiplication of the point with the bernstein polynomial of i, n and t
     pointPerBern(i, n, t) {
         let bern = bernstein(i, n, t);
         this.x = this.x * bern;
         this.y = this.y * bern;
         this.z = this.z * bern;
     }
-
+    //Return the addition of the point with another point
     addPoint(point) {
         this.x = this.x + point.getX();
         this.y = this.y + point.getY();
@@ -72,6 +65,20 @@ function factorial(n) {
 }
 
 //Return the bernstein polynomial of i, n and t
+//the Map is needed to cache the results
+const bernsteinMap = {};
+
 function bernstein(i, n, t) {
-    return binomialCoefficient(n, i) * Math.pow(t, i) * Math.pow(1 - t, n - i);
+    const key = `${i}_${n}_${t}`;
+    //check if the result is already cached
+    if (bernsteinMap.hasOwnProperty(key)) {
+        return bernsteinMap[key];
+    }
+    //calculate the result
+    const result =
+        binomialCoefficient(n, i) * Math.pow(t, i) * Math.pow(1 - t, n - i);
+
+    bernsteinMap[key] = result;
+    return result;
 }
+
