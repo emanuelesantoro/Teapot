@@ -12,26 +12,28 @@ function evaluateBezierSurface(u, v, patch) {
             //find the control point needed : the constructor of point will find the coordinates of the control point in the patch based on the index
             let point = new Point((i * 4) + j, patch)
             //multiply the previous point by the bernstein polynomials calculated in u and v
-            point= point.pointPerBern(i, 3, u).pointPerBern(j, 3, v)
+            point = point.pointPerBern(i, 3, u).pointPerBern(j, 3, v)
             //add the point to the accumulator
-            accumu=accumu.addPoint(point)
+            accumu = accumu.addPoint(point)
         }
     }
     return accumu
 }
+
 //Function that will compute the mean curvature of the surface given the u and v parameters
-function computeMeanCurvature(u, v,patch) {
+function computeMeanCurvature(u, v, patch) {
     // Small value for approximating partial derivatives
     const h = 0.001;
+    if (u - h < 0 || u + h > 1 || v - h < 0 || v + h > 1) return NaN;
     // Evaluate the surface at (u, v)
     const p0 = evaluateBezierSurface(u, v, patch);
-    // Calculate partial derivatives using finite difference
+    // Calculate partial derivatives using finite differences
     // df(u)/du = [f(u + h, v) - f(u, v)] / h
     // df(v)/dv = [f(u, v + h) - f(u, v)] / h
     const UPlusHV = evaluateBezierSurface(u + h, v, patch);
     const UVPlusH = evaluateBezierSurface(u, v + h, patch);
-    const dU = (UPlusHV.subtractPoint(p0)).divideScalar(h);
-    const dV = (UVPlusH.subtractPoint(p0)).divideScalar(h);
+    const dU = UPlusHV.subtractPoint(p0).divideScalar(h);
+    const dV = UVPlusH.subtractPoint(p0).divideScalar(h);
     //Compute the first fundamental form and the three parameters E,F,G that
     //represent the inner product on the tangent plane of the surface
     const E = dU.dot(dU);
@@ -40,14 +42,14 @@ function computeMeanCurvature(u, v,patch) {
 
     // Calculate the second derivative using finite differences
     // d^2f(u,v)/du^2 = [f(u + h, v) - 2f(u,v) + f(u -h, v)] / h^2
-    const UMinusHV= evaluateBezierSurface(u-h,v,patch)
-    const d2U= UPlusHV.subtractPoint(p0.multiplyScalar(2)).addPoint(UMinusHV).divideScalar(Math.pow(h,2))
+    const UMinusHV = evaluateBezierSurface(u - h, v, patch)
+    const d2U = UPlusHV.subtractPoint(p0.multiplyScalar(2)).addPoint(UMinusHV).divideScalar(Math.pow(h, 2))
     // d^2f(u,v)/dv^2 = [f(u, v + h) - 2f(u,v) + f(u, v-h)] / h^2
-    const UVMinusH= evaluateBezierSurface(u,v-h,patch)
-    const d2V= UVPlusH.subtractPoint(p0.multiplyScalar(2)).addPoint(UVMinusH).divideScalar(Math.pow(h,2))
+    const UVMinusH = evaluateBezierSurface(u, v - h, patch)
+    const d2V = UVPlusH.subtractPoint(p0.multiplyScalar(2)).addPoint(UVMinusH).divideScalar(Math.pow(h, 2))
     //d^2f(u,v)/dudv = [f(u + h, v + h) - f(u + h, v) - f(u, v + h) + f(u, v)] / h^2
-    const UPlusHVPlusH= evaluateBezierSurface(u+h,v+h,patch)
-    const d2UV= UPlusHVPlusH.subtractPoint(UPlusHV).subtractPoint(UVPlusH).addPoint(p0).divideScalar(Math.pow(h,2))
+    const UPlusHVPlusH = evaluateBezierSurface(u + h, v + h, patch)
+    const d2UV = UPlusHVPlusH.subtractPoint(UPlusHV).subtractPoint(UVPlusH).addPoint(p0).divideScalar(Math.pow(h, 2))
 
     const normalVector = dU.cross(dV);
     // Compute the second fundamental form
@@ -57,62 +59,148 @@ function computeMeanCurvature(u, v,patch) {
 
 
     // Compute the mean curvature using the formula
+    // H = (LG - 2MF + NE) / (2(EG - F^2))
     return (L * G - 2 * M * F + N * E) / (2 * (E * G - F * F));
 }
 
-//Function rendering the teapot
+let scale = 5  // Adjust this variable to control the color map scale
+
+let colorMap = [
+    [-0.2 * scale, [0, 0, 1]],                            // Blue (Negative Curvature)
+    [-0.1 * scale, [173 / 255, 216 / 255, 230 / 255]],    // Light blue
+    [0, [1, 1, 1]],                                        // White (Zero Curvature)
+    [0.1 * scale, [173 / 255, 216 / 255, 230 / 255]],     // Light blue
+    [0.2 * scale, [0, 1, 0]]                              // Green (Positive Curvature)
+];
+
+function printColorMap() {
+    const canvas = document.getElementById('colorMapCanvas');
+    const context = canvas.getContext('2d');
+
+    const width = canvas.width;
+    const height = canvas.height;
+
+    const segmentWidth = width / (colorMap.length - 1);
+
+// Add a small portion of black on the left side
+    context.fillStyle = 'rgb(0, 0, 0)';
+    context.fillRect(0, 0, segmentWidth, height);
+
+    for (let i = 1; i < colorMap.length + 1 - 1; i++) {
+        const [value1, color1] = colorMap[i];
+        const [value2, color2] = colorMap[i + 1];
+
+        const x1 = (i -1) * segmentWidth;
+        const x2 = (i ) * segmentWidth;
+
+        context.fillStyle = `rgb(${color1.map(c => Math.round(c * 255)).join(', ')})`;
+        context.fillRect(x1, 0, x2 - x1, height);
+
+        // Linearly interpolate between the two colors
+        for (let j = x1; j < x2; j++) {
+            const t = (j - x1) / (x2 - x1);
+            const color = color1.map((c, index) => c + t * (color2[index] - c));
+            context.fillStyle = `rgb(${color.map(c => Math.round(c * 255)).join(', ')})`;
+            context.fillRect(j, 0, 1, height);
+        }
+    }
+}
+
+//Function that will compute the color based on the mean curvature
+function computeColor(u, v, patch) {
+    let value = computeMeanCurvature(u, v, patch)
+    if (isNaN(value)) return [0, 0, 0];
+    // Check if value is larger than the last entry in the color map
+    // Check if the value is smaller than the first entry
+    if (value < colorMap[0][0]) {
+        return colorMap[0][1]; // Return the color of the first entry
+    }
+
+    // Check if the value is larger than the last entry
+    if (value > colorMap[colorMap.length - 1][0]) {
+        return colorMap[colorMap.length - 1][1]; // Return the color of the last entry
+    }
+
+    // Iterate over the color map to find the appropriate color
+    for (let i = 1; i < colorMap.length; i++) {
+        const [threshold, color] = colorMap[i];
+
+        // Check if the value falls within the threshold range
+        if (value <= threshold) {
+            return color;
+        }
+    }
+}
+
+//define how many times we should campionate the surface
+let divs;
 let teapotPoints = [];
 let teapotFaces = [];
+let colorIndex = [];
+let transparent;
 
+//Function that will generate the faces and the points of the teapot
 function generatePolyTeapot() {
     let numPatches = teapotBP.length;
     teapotPoints = [];
     teapotFaces = [];
-    // let patchIwantToDraw = 12;
-    // numPatches = patchIwantToDraw;
+    colorIndex = [];
     //Generate teapotPoints and vertices
     for (let np = 0; np < numPatches; ++np) {
         // Generate grid and assign values to teapotPoints
         let points = [];
-        for (let j = 0, k = 0; j <= divs; ++j) {
-            for (let i = 0; i <= divs; ++i, ++k) {
-                points.push(evaluateBezierSurface(i / divs, j / divs, np));
-            }
-        }
-        teapotPoints.push(points)
-
-        // Face connectivity and assign values to vertices
         let faces = [];
+        let colors = [];
         let shiftPatch = np * (divs + 1) * (divs + 1);
-        for (let i = 0, k = 0; i < divs; ++i) {
-            for (let j = 0; j < divs; ++j, ++k) {
+        for (let i = 0, k = 0; i <= divs; ++i) {
+            for (let j = 0; j <= divs; ++j, ++k) {
+                //calculate the point and put it in the points array
+                points.push(evaluateBezierSurface(j / divs, i / divs, np));
+                //calculate the color for the vertex and put it in the colorIndex array
+                colors.push(computeColor(j / divs, i / divs, np));
                 //we know that the faces respect this topology
                 // all patches have the same topology
                 //     faces = [ [ 0,  1,  5,  4], [ 1,  2,  6,  5], [ 2,  3,  7,  6],
                 //               [ 4,  5,  9,  8], [ 5,  6, 10,  9], [ 6,  7, 11, 10],
                 //               [ 8,  9, 13, 12], [ 9, 10, 14, 13], [10, 11, 15, 14]];
                 //therefore if we think in a grid 4*4 we can see that the following respects the topology but in a clockwise instead of anticlockwise to render the external surfaces.
-                faces[k * 4] = (divs + 1) * i + j + shiftPatch;
-                faces[k * 4 + 3] = (divs + 1) * (i) + j + 1 + shiftPatch; //change this to k*4+1 to render the internal surfaces in anticlockwise
-                faces[k * 4 + 2] = (divs + 1) * (i + 1) + j + 1 + shiftPatch;
-                faces[k * 4 + 1] = (divs + 1) * (i + 1) + j + shiftPatch; //change this to k*4+3 to render the internal surfaces in anticlockwise
+                if (i !== divs && j !== divs) {
+                    //put the index of the point in the faces array
+                    faces[k * 4] = (divs + 1) * i + j + shiftPatch;
+                    faces[k * 4 + (transparent ? 1 : 3)] = (divs + 1) * (i) + j + 1 + shiftPatch; //change this to k*4+1 to render the internal surfaces in anticlockwise
+                    faces[k * 4 + 2] = (divs + 1) * (i + 1) + j + 1 + shiftPatch;
+                    faces[k * 4 + (transparent ? 3 : 1)] = (divs + 1) * (i + 1) + j + shiftPatch; //change this to k*4+3 to render the internal surfaces in anticlockwise
+
+                }
             }
         }
+        teapotPoints.push(points)
+        colorIndex.push(colors)
         teapotFaces.push(faces)
     }
 }
 
+//Function to transform the teapotPoints to a string: it is used for the indexed faceset
 function pointsToString() {
     // Convert teapotPoints to a plain string array separated by spaces
     return teapotPoints.map(patch => patch.map(point => point.toString()).join(" ")).join(" ");
 
 }
 
+//Function to transform the colorIndex to a string: it is used for the indexed faceset
+function colorsToString() {
+    return colorIndex.map(patch => patch.map(color => {
+        return color.join(" ");
+    }).join(" ")).join(" ");
+}
+
+//Function to transform the teapotFaces to a string: it is used for the indexed faceset
 function facesToString() {
     const modifiedArray = [];
-    //this is needed because indexed faceset requires a -1 to separate the faces. (if -1 is not present it will render each face has a triangle)
+
     for (let patch = 0; patch < teapotFaces.length; patch++) {
         let counter = 0;
+
         teapotFaces[patch].map(elem => {
             modifiedArray.push(elem);
             counter++;
@@ -122,28 +210,30 @@ function facesToString() {
             }
         });
     }
-    return modifiedArray.join(' ');
+    return modifiedArray.join(' ')
+
 }
 
-//define globally the division of the teapot
-var divs;
-
-function updateStepUV() {
+function updateParameters() {
     divs = parseInt(document.getElementById("divs").value);
+    transparent = document.getElementById("transparent").checked;
     generatePolyTeapot()
     update();
+    printColorMap()
 }
 
 
 // Function to update the teapot point cloud
 function update() {
     // Get the pointSet element
-    let pointSet = document.getElementById("points");
-    let faceSet = document.getElementById("faces");
-    pointSet.setAttribute("point", pointsToString());
-    faceSet.setAttribute("coordIndex", facesToString());
+    let pointSets = document.querySelectorAll(".points");
+    let faceSets = document.querySelectorAll(".faces");
+    let colorSet = document.getElementById("colors");
+    colorSet.setAttribute("color", colorsToString());
+    pointSets.forEach((pointSet) => pointSet.setAttribute("point", pointsToString()));
+    faceSets.forEach((faceSet) => faceSet.setAttribute("coordIndex", facesToString()));
 }
 
 
-document.addEventListener("load", updateStepUV);
-document.getElementById("btn").addEventListener("click", updateStepUV)
+document.addEventListener("load", updateParameters);
+document.getElementById("btn").addEventListener("click", updateParameters);

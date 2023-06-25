@@ -11,17 +11,17 @@
 </head>
 
 <body>
-    <h1>Second task: Render Teapot</h1>
+    <h1>Second Exercise, Second Task: Render Teapot</h1>
     <div class="box">
-        <x3d id="teapotScene">
+        <x3d class="teapotScene">
             <scene>
                 <transform translation="0 0 0">
                     <shape>
                         <appearance>
-                            <material diffuseColor="1 0 0"></material>
+                            <material diffuseColor="0.8 0.9 0.99"></material>
                         </appearance>
-                        <indexedFaceSet id="faces" coordIndex="[3 2 1 0]" edge="true" solid="true" colorpervertex="true" creaseAngle="0">
-                            <coordinate id="points" point="0 0 0 1 1 0 1 0 0 0 1 0"></coordinate>
+                        <indexedFaceSet class="faces" coordIndex="3 2 1 0" edge="true" solid="true" colorPerVertex="true" creaseAngle="0">
+                            <coordinate class="points" point="0 0 0 1 1 0 1 0 0 0 1 0"></coordinate>
                         </indexedFaceSet>
                     </shape>
                 </transform>
@@ -30,10 +30,35 @@
     </div>
     <div class="inptBox">
         <span class="inptLabel">Step:</span>
-        <input class="inpt" type="number" id="divs" value="3" min="1" max="200"/>
+        <input class="inpt" type="number" id="divs" value="20" min="1" max="200"/>
+    </div>
+    <div>
+        <input type="checkbox" id="transparent" name="transparency" >
+        <label for="scales">Transparency</label>
     </div>
     <div class="btnBox">
         <button class="btn" id="btn">Render</button>
+    </div>
+    <h1>Second Exercise, Fourth Task: Colorize Teapot</h1>
+    <div class="box">
+        <x3d class="teapotScene">
+            <scene>
+                <transform translation="0 0 0">
+                    <shape>
+                        <appearance>
+                            <material></material>
+                        </appearance>
+                        <indexedFaceSet class="faces" coordIndex="3 2 1 0" solid="true" colorPerVertex="true" >
+                            <color id="colors" color="1 0 0 0 1 0 0 0 1 1 0 0"></color>
+                            <coordinate class="points" point="0 0 0 1 1 0 1 0 0 0 1 0"></coordinate>
+                        </indexedFaceSet>
+                    </shape>
+                </transform>
+            </scene>
+        </x3d>
+    </div>
+    <div class="box" id="canvasBox">
+    <canvas id="colorMapCanvas"></canvas>
     </div>
 </body>
 

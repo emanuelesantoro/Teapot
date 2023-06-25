@@ -1,7 +1,7 @@
-#teapotScene {
+.teapotScene {
     width: 600px;
     height: 600px;
-    background: grey;
+    background: #e0d5d5;
 }
 
 .inpt {
@@ -28,7 +28,7 @@
 
 button {
     box-shadow: 0px 0px 0px 0px #3dc21b;
-    background-color: #44c767;
+    background-color: #4dd771;
     border-radius: 16px;
     border: 1px solid #18ab29;
     display: inline-block;
@@ -48,5 +48,18 @@ button:hover {
 button:active {
     position: relative;
     top: 1px;
+}
+p,
+label {
+    font: 1rem 'Fira Sans', sans-serif;
+}
+
+input {
+    margin: 0.4rem;
+}
+#colorMapCanvas {
+    padding-top: 10%;
+    width: 400px;
+    height: 80px;
 }
 

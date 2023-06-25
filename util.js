@@ -100,3 +100,4 @@ function bernstein(i, n, t) {
     return result;
 }
 
+
