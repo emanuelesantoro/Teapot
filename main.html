@@ -57,8 +57,17 @@
             </scene>
         </x3d>
     </div>
-    <div class="box" id="canvasBox">
+    <div class="inptBox">
+        <span class="inptLabel">Scale for Colors:</span>
+        <input class="inpt" type="number" id="scale" value="10" min="1" max="200"/>
+    </div>
+
+    <div
+            id="canvasBox">
+        <p >Scale of the color Map with Mean Curvature:</p>
+        <p id="scaleLabel">Scale</p>
     <canvas id="colorMapCanvas"></canvas>
+        <p >The Black Color refers to the point where the second derivative is not calculable since we are on a patch's border</p>
     </div>
 </body>
 

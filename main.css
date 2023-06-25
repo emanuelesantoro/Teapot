@@ -58,7 +58,6 @@ input {
     margin: 0.4rem;
 }
 #colorMapCanvas {
-    padding-top: 10%;
     width: 400px;
     height: 80px;
 }

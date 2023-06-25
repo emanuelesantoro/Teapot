@@ -64,14 +64,7 @@ function computeMeanCurvature(u, v, patch) {
 }
 
 let scale = 5  // Adjust this variable to control the color map scale
-
-let colorMap = [
-    [-0.2 * scale, [0, 0, 1]],                            // Blue (Negative Curvature)
-    [-0.1 * scale, [173 / 255, 216 / 255, 230 / 255]],    // Light blue
-    [0, [1, 1, 1]],                                        // White (Zero Curvature)
-    [0.1 * scale, [173 / 255, 216 / 255, 230 / 255]],     // Light blue
-    [0.2 * scale, [0, 1, 0]]                              // Green (Positive Curvature)
-];
+let colorMap;
 
 function printColorMap() {
     const canvas = document.getElementById('colorMapCanvas');
@@ -86,12 +79,12 @@ function printColorMap() {
     context.fillStyle = 'rgb(0, 0, 0)';
     context.fillRect(0, 0, segmentWidth, height);
 
-    for (let i = 1; i < colorMap.length + 1 - 1; i++) {
+    for (let i = 0; i < colorMap.length - 1; i++) {
         const [value1, color1] = colorMap[i];
         const [value2, color2] = colorMap[i + 1];
 
-        const x1 = (i -1) * segmentWidth;
-        const x2 = (i ) * segmentWidth;
+        const x1 = (i - 1) * segmentWidth;
+        const x2 = (i) * segmentWidth;
 
         context.fillStyle = `rgb(${color1.map(c => Math.round(c * 255)).join(', ')})`;
         context.fillRect(x1, 0, x2 - x1, height);
@@ -112,8 +105,8 @@ function computeColor(u, v, patch) {
     if (isNaN(value)) return [0, 0, 0];
     // Check if value is larger than the last entry in the color map
     // Check if the value is smaller than the first entry
-    if (value < colorMap[0][0]) {
-        return colorMap[0][1]; // Return the color of the first entry
+    if (value < colorMap[1][0]) {
+        return colorMap[1][1]; // Return the color of the first entry
     }
 
     // Check if the value is larger than the last entry
@@ -217,6 +210,23 @@ function facesToString() {
 function updateParameters() {
     divs = parseInt(document.getElementById("divs").value);
     transparent = document.getElementById("transparent").checked;
+    scale = parseInt(document.getElementById("scale").value);
+    // Define the color map
+    colorMap = [
+        [-0.4 * scale, [79 / 255, 84 / 255, 118 / 255]],                            // Dark gray (Negative Curvature)
+        [-0.3 * scale, [230 / 255, 131 / 255, 230 / 255]],   // Purple (Negative Curvature)
+        [-0.2 * scale, [0, 0, 1]],                            // Blue (Negative Curvature)
+        [-0.1 * scale, [173 / 255, 216 / 255, 230 / 255]],    // Light blue
+        [0, [1, 1, 1]],                                        // White (Zero Curvature)
+        [0.1 * scale, [173 / 255, 216 / 255, 230 / 255]],     // Light blue
+        [0.2 * scale, [0, 1, 0]],                              // Green (Positive Curvature)
+        [0.3 * scale, [1, 1, 0]],                             //Yellow (Positive Curvature)
+        [0.4 * scale, [1, 0, 0]]                            //Red (Positive Curvature)
+    ];
+    document.getElementById("scaleLabel").innerText = "Dark Gray: " + (-0.4 * scale) + "  Purple: " + (-0.3 * scale) +
+        " Blue: " + (-0.2 * scale) + " Light Blue: " + (-0.1 * scale) + "  White: 0  Light Blue: " + (0.1 * scale)
+        + " Green: " + (0.2 * scale) + " Yellow: " + (0.3 * scale)
+        + " Red: " + (0.4 * scale);
     generatePolyTeapot()
     update();
     printColorMap()
